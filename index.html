@@ -3,21 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HACKERS UNIVERSITY</title>
+    <title>Automated Transfer Credit Evaluator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             background-color: #0a0e17;
             color: #ffffff;
         }
         header {
-            background-color: #0a0e17;
+            background-color: rgba(10, 14, 23, 0.8);
             padding: 1rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            width: 90%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
         }
         .logo {
             height: 40px;
@@ -31,26 +36,53 @@
         nav ul li a {
             color: #a0a0a0;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        nav ul li a:hover {
+            color: #8cc63f;
         }
         .cta-button {
             background-color: #8cc63f;
             color: #000000;
             padding: 10px 20px;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 25px;
             font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            background-color: #a0e350;
         }
         .hero {
-            padding: 5% 5% 10%;
-            background: linear-gradient(to right, #0a0e17, #1a2030);
+            padding: 150px 5% 10%;
+            background: linear-gradient(135deg, #0a0e17, #1a2030);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://via.placeholder.com/1500x800') no-repeat center center;
+            background-size: cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
         }
         .hero h1 {
-            font-size: 4rem;
+            font-size: 4.5rem;
             margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: #a0a0a0;
             margin-bottom: 2rem;
             max-width: 600px;
@@ -64,43 +96,53 @@
             color: #ffffff;
             padding: 10px 20px;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 25px;
+            transition: background-color 0.3s ease;
+        }
+        .secondary-button:hover {
+            background-color: #3a4050;
         }
         .trial-banner {
-            background-color: #1a2030;
-            color: #8cc63f;
+            background-color: #8cc63f;
+            color: #000000;
             padding: 10px;
             text-align: center;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
     <header>
-        <img src="logo.png" alt="Logo" class="logo">
+        <img src="https://via.placeholder.com/120x40" alt="Hackers University Logo" class="logo">
         <nav>
             <ul>
-                <li><a href="#products">Products</a></li>
-                <li><a href="#solutions">Solutions</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-                <li><a href="#resources">Resources</a></li>
-                <li><a href="#company">Company</a></li>
+                <li><a href="#atce">ATCE</a></li>
+                <li><a href="#login">Login</a></li>
+                <li><a href="docs.html">Docs</a></li>
+                <li><a href="#about">About</a></li>
             </ul>
         </nav>
-        <a href="#" class="cta-button">Get Started</a>
+        <a href="#" class="cta-button">Join Now</a>
     </header>
     <main>
         <section class="hero">
-            <h1>Your Cyber Performance Center</h1>
-            <p>Build and sustain high-performing cyber teams protecting your organization against real-world threats.</p>
-            <div class="button-group">
-                <a href="#" class="cta-button">Read more</a>
-                <a href="#" class="secondary-button">Get a demo</a>
+            <div class="hero-content">
+                <h1>Level Up Your Cyber Skills</h1>
+                <p>Wondering how your credits will transfer to FIT? Use the ATCE tool designed just for you!</p>
+                <div class="button-group">
+                    <a href="#" class="cta-button">Use Tool</a>
+                    <a href="#" class="secondary-button">Watch Demo</a>
+                </div>
             </div>
         </section>
     </main>
     <div class="trial-banner">
-        NEW: Start a 14-day trial for FREE &rarr;
+        🚀 NEW: Try a demo today! 🚀
     </div>
 </body>
 </html>
