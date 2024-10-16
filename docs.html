@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HACKERS UNIVERSITY - Docs</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0a0e17;
+            color: #ffffff;
+        }
+        header {
+            background-color: rgba(10, 14, 23, 0.8);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 90%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+        nav ul {
+            list-style-type: none;
+            display: flex;
+            gap: 20px;
+        }
+        nav ul li a {
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        nav ul li a:hover {
+            color: #8cc63f;
+        }
+        .content {
+            padding: 100px 5% 50px;
+        }
+        h1, h2 {
+            color: #8cc63f;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #1a2030;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #2a3040;
+        }
+        th {
+            background-color: #2a3040;
+            color: #8cc63f;
+        }
+        tr:hover {
+            background-color: #2a3040;
+        }
+        .document-link {
+            color: #8cc63f;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .document-link:hover {
+            color: #a0e350;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://via.placeholder.com/120x40" alt="Hackers University Logo" class="logo">
+        <nav>
+            <ul>
+                <li><a href="#docs">Docs</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#login">Login</a></li>
+                <li><a href="#atce">ATCE</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="content">
+        <h1>Course Documentation</h1>
+        
+        <h2>First Semester</h2>
+        <table>
+            <tr>
+                <th>Task</th>
+                <th>Due Date</th>
+                <th>Documents</th>
+            </tr>
+            <tr>
+                <td>Plan</td>
+                <td>Sep 4</td>
+                <td><a href="#" class="document-link">Plan</a>, <a href="#" class="document-link">Presentation</a></td>
+            </tr>
+            <tr>
+                <td>Milestone 1</td>
+                <td>Sep 30</td>
+                <td><a href="#" class="document-link">Requirement</a>, <a href="#" class="document-link">Design</a>, <a href="#" class="document-link">Test</a>, <a href="#" class="document-link">Presentation</a>, <a href="#" class="document-link">Progress Evaluation</a></td>
+            </tr>
+            <tr>
+                <td>Milestone 2</td>
+                <td>Oct 28</td>
+                <td><a href="#" class="document-link">View Presentation</a>, <a href="#" class="document-link">Progress Evaluation</a></td>
+            </tr>
+            <tr>
+                <td>Milestone 3</td>
+                <td>Nov 25</td>
+                <td><a href="#" class="document-link">View Presentation</a>, <a href="#" class="document-link">Progress Evaluation</a></td>
+            </tr>
+        </table>
+
+        <h2>Second Semester</h2>
+        <table>
+            <tr>
+                <th>Task</th>
+                <th>Due Date</th>
+                <th>Documents</th>
+            </tr>
+            <tr>
+                <td>Plan</td>
+                <td>Sep 4</td>
+                <td><a href="#" class="document-link">View Plan</a>, <a href="#" class="document-link">Presentation</a></td>
+            </tr>
+            <tr>
+                <td>Milestone 4</td>
+                <td>Sep 30</td>
+                <td><a href="#" class="document-link">View Presentation</a>, <a href="#" class="document-link">Progress Evaluation</a></td>
+            </tr>
+            <tr>
+                <td>Milestone 5</td>
+                <td>Oct 28</td>
+                <td><a href="#" class="document-link">View Poster</a>, <a href="#" class="document-link">Presentation</a>, <a href="#" class="document-link">Progress Evaluation</a></td>
+            </tr>
+            <tr>
+                <td>Milestone 6</td>
+                <td>Nov 25</td>
+                <td><a href="#" class="document-link">View User and/or Developer Manual</a>, <a href="#" class="document-link">Demo Video</a>, <a href="#" class="document-link">Presentation</a>, <a href="#" class="document-link">Progress Evaluation</a></td>
+            </tr>
+        </table>
+    </main>
+</body>
+</html>
