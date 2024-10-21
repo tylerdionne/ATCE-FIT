@@ -1,1 +1,145 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Florida Institute of Technology</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #003366;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 90%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .logo {
+            height: 50px;
+            width: auto;
+        }
+        nav ul {
+            list-style-type: none;
+            display: flex;
+            gap: 30px;
+        }
+        nav ul li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        nav ul li a:hover {
+            color: #ffd700;
+        }
+        .cta-button {
+            background-color: #ffd700;
+            color: #003366;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            background-color: #ffea00;
+        }
+        main {
+            padding: 100px 5% 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            font-family: 'Merriweather', serif;
+            color: #003366;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2rem;
+        }
+        p {
+            line-height: 1.6;
+        }
+        .about-section {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .trial-banner {
+            background-color: #ffd700;
+            color: #003366;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="logo.svg" alt="Logo" style="width:150px; height:auto;">
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="atce.html">ATCE Tool</a></li>
+                <li><a href="#admissions">Catalogs</a></li>
+                <li><a href="docs.html">Docs</a></li>
+            </ul>
+        </nav>
+        <a href="#" class="cta-button">Apply Now</a>
+    </header>
+    <main>
+        <h1>About Florida Institute of Technology</h1>
+        
+        <section class="about-section">
+            <h2>Our History</h2>
+            <p>Founded in 1958, Florida Institute of Technology has grown from its origins as "Brevard Engineering College" to become a comprehensive, research-intensive national university with a focus on science, technology, engineering, and mathematics (STEM).</p>
+        </section>
+        
+        <section class="about-section">
+            <h2>Academic Excellence</h2>
+            <p>Florida Tech offers more than 200 degree programs at the bachelor's, master's, and doctoral levels. Our rigorous curriculum is designed to challenge students and prepare them for successful careers in rapidly evolving fields.</p>
+        </section>
+        
+        <section class="about-section">
+            <h2>Research and Innovation</h2>
+            <p>As a tier 1 research university, Florida Tech is at the forefront of cutting-edge research in various fields, including aerospace, robotics, marine biology, and sustainable energy. Our faculty and students are engaged in groundbreaking projects that address real-world challenges.</p>
+        </section>
+        
+        <section class="about-section">
+            <h2>Campus Life</h2>
+            <p>Located in Melbourne, Florida, our beautiful campus offers a vibrant and diverse community. With over 200 student organizations, Division II athletics, and proximity to beaches and technology corridors, Florida Tech provides an enriching college experience both inside and outside the classroom.</p>
+        </section>
+        
+        <section class="about-section">
+            <h2>Global Impact</h2>
+            <p>Florida Tech's alumni network spans the globe, with graduates making significant contributions in industry, research, and public service. Our international student body and partnerships with institutions worldwide foster a global perspective that prepares students for success in an interconnected world.</p>
+        </section>
+    </main>
+    <div class="trial-banner">
+        🎓 NEW: Schedule a virtual campus tour today! 🎓
+    </div>
+</body>
+</html>
