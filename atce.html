@@ -157,24 +157,24 @@
                 const lines = content.split('\n');
                 let isValid = true;
 
-                // Validate each line
+                // validate each line
                 for (let line of lines) {
-                    if (line.trim() === '') continue; // Skip empty lines
+                    if (line.trim() === '') continue; // skip empty lines
                     
-                    // Check format: COURSE NAME, CREDITS, GRADE
+                    // check format: COURSE NAME, CREDITS, GRADE
                     const parts = line.split(',').map(part => part.trim());
                     if (parts.length !== 3) {
                         isValid = false;
                         break;
                     }
 
-                    // Validate credits is a number
+                    // validate credits is a number
                     if (isNaN(parts[1])) {
                         isValid = false;
                         break;
                     }
 
-                    // Basic grade validation (you can make this more specific)
+                    // basic grade validation (can make this more specific)
                     if (!parts[2].match(/^[A-F][+-]?$/)) {
                         isValid = false;
                         break;
@@ -186,7 +186,7 @@
                     formatError.textContent = 'Invalid format. Please ensure each line follows: COURSE NAME, CREDITS, GRADE RECEIVED';
                 } else {
                     formatError.style.display = 'none';
-                    // Process the valid transcript
+                    // process the valid transcript
                     processTranscript(lines);
                 }
             };
@@ -195,8 +195,8 @@
         }
 
         function processTranscript(lines) {
-            // Here you can add the logic to process the transcript
-            // For now, we'll just log the valid data
+            // here add the logic to process transcript
+            // for now just log the valid data
             const courses = lines
                 .filter(line => line.trim() !== '')
                 .map(line => {
@@ -205,7 +205,7 @@
                 });
             
             console.log('Processed courses:', courses);
-            // Add your evaluation logic here
+            // add evaluation logic here
         }
     </script>
 </body>
