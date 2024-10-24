@@ -118,9 +118,9 @@
             </div>
             <div class="format-example">
                 Required format:<br>
-                COURSE NAME, CREDITS, GRADE RECEIVED<br>
+                COURSE ID, COURSE NAME, CREDITS, GRADE RECEIVED<br>
                 Example:<br>
-                CSE 3120, 3, A+
+                CSE 3120, Database Systems, 3, A+
             </div>
         </div>
         <div class="input-section">
@@ -148,65 +148,65 @@
                 formatError.textContent = 'Please select a file.';
                 return;
             }
-
+        
             const file = fileInput.files[0];
             const reader = new FileReader();
-
+        
             reader.onload = function(e) {
                 const content = e.target.result;
                 const lines = content.split('\n');
                 let isValid = true;
-
+        
                 // validate each line
                 for (let line of lines) {
                     if (line.trim() === '') continue; // skip empty lines
                     
-                    // check format: COURSE NAME, CREDITS, GRADE
+                    // check format: COURSE ID, COURSE NAME, CREDITS, GRADE
                     const parts = line.split(',').map(part => part.trim());
-                    if (parts.length !== 3) {
+                    if (parts.length !== 4) {
                         isValid = false;
                         break;
                     }
-
+        
                     // validate credits is a number
-                    if (isNaN(parts[1])) {
+                    if (isNaN(parts[2])) {
                         isValid = false;
                         break;
                     }
-
+        
                     // basic grade validation (can make this more specific)
-                    if (!parts[2].match(/^[A-F][+-]?$/)) {
+                    if (!parts[3].match(/^[A-F][+-]?$/)) {
                         isValid = false;
                         break;
                     }
                 }
-
+        
                 if (!isValid) {
                     formatError.style.display = 'block';
-                    formatError.textContent = 'Invalid format. Please ensure each line follows: COURSE NAME, CREDITS, GRADE RECEIVED';
+                    formatError.textContent = 'Invalid format. Please ensure each line follows: COURSE ID, COURSE NAME, CREDITS, GRADE RECEIVED';
                 } else {
                     formatError.style.display = 'none';
                     // process the valid transcript
                     processTranscript(lines);
                 }
             };
-
+        
             reader.readAsText(file);
         }
-
+        
         function processTranscript(lines) {
-            // here add the logic to process transcript
-            // for now just log the valid data
+            // process the transcript with the new format
             const courses = lines
                 .filter(line => line.trim() !== '')
                 .map(line => {
-                    const [course, credits, grade] = line.split(',').map(part => part.trim());
-                    return { course, credits: parseFloat(credits), grade };
+                    const [courseID, courseName, credits, grade] = line.split(',').map(part => part.trim());
+                    return { courseID, courseName, credits: parseFloat(credits), grade };
                 });
             
             console.log('Processed courses:', courses);
             // add evaluation logic here
         }
+
     </script>
 </body>
 </html>
