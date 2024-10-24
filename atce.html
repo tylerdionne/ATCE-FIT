@@ -39,6 +39,8 @@
         main {
             padding: 40px;
             text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
         }
         h1 {
             font-size: 2.5em;
@@ -46,13 +48,19 @@
         }
         .input-section {
             margin-bottom: 20px;
+            text-align: left;
         }
         .input-section label {
             display: block;
             margin-bottom: 10px;
         }
-        .input-section input, .input-section select {
+        .input-section input {
             width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+        .input-section select {
+            width: 300px;
             padding: 10px;
             margin-bottom: 20px;
         }
@@ -64,6 +72,19 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 1.1em;
+        }
+        .error-message {
+            color: #FFD700;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+        .format-example {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
         }
         footer {
             background-color: #FFD700;
@@ -87,12 +108,20 @@
         </nav>
         <button class="apply-btn">Apply Now</button>
     </header>
-
     <main>
         <h1>Automated Transfer Credit Evaluator (ATCE)</h1>
         <div class="input-section">
             <label for="transcript">Upload your transcript (.txt file):</label>
             <input type="file" id="transcript" accept=".txt">
+            <div id="format-error" class="error-message">
+                Invalid format. Please ensure your file follows the required format.
+            </div>
+            <div class="format-example">
+                Required format:<br>
+                COURSE NAME, CREDITS, GRADE RECEIVED<br>
+                Example:<br>
+                CSE 3120, 3, A+
+            </div>
         </div>
         <div class="input-section">
             <label for="catalog">Select a catalog:</label>
@@ -103,11 +132,81 @@
                 <option value="catalog3">Catalog 3</option>
             </select>
         </div>
-        <button class="evaluate-btn">Evaluate</button>
+        <button class="evaluate-btn" onclick="evaluateTranscript()">Evaluate</button>
     </main>
-
     <footer>
-    
+        © 2024 Florida Institute of Technology
     </footer>
+
+    <script>
+        function evaluateTranscript() {
+            const fileInput = document.getElementById('transcript');
+            const formatError = document.getElementById('format-error');
+            
+            if (fileInput.files.length === 0) {
+                formatError.style.display = 'block';
+                formatError.textContent = 'Please select a file.';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n');
+                let isValid = true;
+
+                // Validate each line
+                for (let line of lines) {
+                    if (line.trim() === '') continue; // Skip empty lines
+                    
+                    // Check format: COURSE NAME, CREDITS, GRADE
+                    const parts = line.split(',').map(part => part.trim());
+                    if (parts.length !== 3) {
+                        isValid = false;
+                        break;
+                    }
+
+                    // Validate credits is a number
+                    if (isNaN(parts[1])) {
+                        isValid = false;
+                        break;
+                    }
+
+                    // Basic grade validation (you can make this more specific)
+                    if (!parts[2].match(/^[A-F][+-]?$/)) {
+                        isValid = false;
+                        break;
+                    }
+                }
+
+                if (!isValid) {
+                    formatError.style.display = 'block';
+                    formatError.textContent = 'Invalid format. Please ensure each line follows: COURSE NAME, CREDITS, GRADE RECEIVED';
+                } else {
+                    formatError.style.display = 'none';
+                    // Process the valid transcript
+                    processTranscript(lines);
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        function processTranscript(lines) {
+            // Here you can add the logic to process the transcript
+            // For now, we'll just log the valid data
+            const courses = lines
+                .filter(line => line.trim() !== '')
+                .map(line => {
+                    const [course, credits, grade] = line.split(',').map(part => part.trim());
+                    return { course, credits: parseFloat(credits), grade };
+                });
+            
+            console.log('Processed courses:', courses);
+            // Add your evaluation logic here
+        }
+    </script>
 </body>
 </html>
