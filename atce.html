@@ -303,4 +303,127 @@
                     }
 
                     let courseID = parts[0];
-                    let
+                    let courseName = parts.slice(1, -2).join(' ');
+                    let credits = parseFloat(parts[parts.length - 2]);
+                    let grade = parseGrade(parts[parts.length - 1]);
+
+                    if (!courseID || !courseName || isNaN(credits) || !grade) {
+                        invalidLines++;
+                        continue;
+                    }
+
+                    processedLines.push({
+                        courseID,
+                        courseName,
+                        credits,
+                        grade
+                    });
+
+                } catch (err) {
+                    invalidLines++;
+                }
+            }
+
+            return { processedLines, invalidLines };
+        }
+
+        // Transcript file upload functionality
+        let fileInput = document.getElementById('transcript');
+        let uploadContainer = document.getElementById('uploadContainer');
+        let fileInfo = document.getElementById('fileInfo');
+        let progressBar = document.getElementById('progressBar');
+        let progress = document.getElementById('progress');
+        let formatError = document.getElementById('format-error');
+        let resultsContainer = document.getElementById('results-container');
+        let resultsBody = document.getElementById('results-body');
+        let totalCredits = document.getElementById('total-credits');
+
+        // Drag-and-drop functionality
+        uploadContainer.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            uploadContainer.classList.add('drag-over');
+        });
+
+        uploadContainer.addEventListener('dragleave', () => {
+            uploadContainer.classList.remove('drag-over');
+        });
+
+        uploadContainer.addEventListener('drop', (event) => {
+            event.preventDefault();
+            uploadContainer.classList.remove('drag-over');
+            let files = event.dataTransfer.files;
+            if (files.length) {
+                fileInput.files = files;
+                processFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            let file = fileInput.files[0];
+            if (file) {
+                processFile(file);
+            }
+        });
+
+        function processFile(file) {
+            let reader = new FileReader();
+
+            reader.onloadstart = () => {
+                progressBar.style.display = 'block';
+                formatError.style.display = 'none';
+                resultsContainer.style.display = 'none';
+            };
+
+            reader.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    let percentage = (event.loaded / event.total) * 100;
+                    progress.style.width = percentage + '%';
+                }
+            };
+
+            reader.onloadend = () => {
+                progressBar.style.display = 'none';
+
+                let content = reader.result;
+                let lines = cleanText(content);
+
+                // Validate and process the content
+                let { processedLines, invalidLines } = validateAndProcessContent(lines);
+
+                if (invalidLines > 0) {
+                    formatError.style.display = 'block';
+                    formatError.innerHTML = `${invalidLines} invalid lines were skipped.`;
+                }
+
+                // Display results
+                if (processedLines.length > 0) {
+                    resultsContainer.style.display = 'block';
+                    resultsBody.innerHTML = '';
+                    let total = 0;
+
+                    for (let line of processedLines) {
+                        resultsBody.innerHTML += `
+                            <tr>
+                                <td>${line.courseID}</td>
+                                <td>${line.courseName}</td>
+                                <td>${line.credits}</td>
+                                <td>${line.grade}</td>
+                            </tr>
+                        `;
+                        total += line.credits;
+                    }
+
+                    totalCredits.innerText = total;
+                }
+            };
+
+            reader.onerror = () => {
+                formatError.style.display = 'block';
+                formatError.innerHTML = 'An error occurred while reading the file.';
+            };
+
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
