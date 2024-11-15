@@ -1,3 +1,4 @@
+TEMP
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -258,172 +259,222 @@
     </footer>
 
     <script>
-        // Helper functions
-        function cleanText(text) {
-            return text.replace(/\r\n/g, '\n')
-                       .replace(/\r/g, '\n')
-                       .split('\n')
-                       .map(line => line.trim())
-                       .filter(line => line.length > 0);
+        // Set up PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Initialize elements
+        const uploadContainer = document.getElementById('uploadContainer');
+        const fileInput = document.getElementById('transcript');
+        const fileInfo = document.getElementById('fileInfo');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const formatError = document.getElementById('format-error');
+        const resultsContainer = document.getElementById('results-container');
+
+        // Drag and drop event listeners
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
         }
 
-        function parseGrade(grade) {
-            grade = grade.trim().toUpperCase();
-            if (grade.match(/^[A-F][\+-]?$/)) return grade;
-            if (grade === 'A') return 'A';
-            if (grade === 'B') return 'B';
-            if (grade === 'C') return 'C';
-            if (grade === 'D') return 'D';
-            if (grade === 'F') return 'F';
-            return null;
-        }
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, highlight, false);
+        });
 
-        function validateAndProcessContent(lines) {
-            const processedLines = [];
-            let invalidLines = 0;
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadContainer.addEventListener(eventName, unhighlight, false);
+        });
 
-            for (let line of lines) {
-                try {
-                    if (!line || line.toLowerCase().includes('course') && line.toLowerCase().includes('grade')) {
-                        continue;
-                    }
-
-                    let parts;
-                    if (line.includes(',')) {
-                        parts = line.split(',').map(part => part.trim());
-                    } else if (line.includes('\t')) {
-                        parts = line.split('\t').map(part => part.trim());
-                    } else {
-                        parts = line.split(/\s{2,}/).map(part => part.trim());
-                    }
-
-                    if (parts.length < 3) {
-                        invalidLines++;
-                        continue;
-                    }
-
-                    let courseID = parts[0];
-                    let courseName = parts.slice(1, -2).join(' ');
-                    let credits = parseFloat(parts[parts.length - 2]);
-                    let grade = parseGrade(parts[parts.length - 1]);
-
-                    if (!courseID || !courseName || isNaN(credits) || !grade) {
-                        invalidLines++;
-                        continue;
-                    }
-
-                    processedLines.push({
-                        courseID,
-                        courseName,
-                        credits,
-                        grade
-                    });
-
-                } catch (err) {
-                    invalidLines++;
-                }
-            }
-
-            return { processedLines, invalidLines };
-        }
-
-        // Transcript file upload functionality
-        let fileInput = document.getElementById('transcript');
-        let uploadContainer = document.getElementById('uploadContainer');
-        let fileInfo = document.getElementById('fileInfo');
-        let progressBar = document.getElementById('progressBar');
-        let progress = document.getElementById('progress');
-        let formatError = document.getElementById('format-error');
-        let resultsContainer = document.getElementById('results-container');
-        let resultsBody = document.getElementById('results-body');
-        let totalCredits = document.getElementById('total-credits');
-
-        // Drag-and-drop functionality
-        uploadContainer.addEventListener('dragover', (event) => {
-            event.preventDefault();
+        function highlight(e) {
             uploadContainer.classList.add('drag-over');
-        });
+        }
 
-        uploadContainer.addEventListener('dragleave', () => {
+        function unhighlight(e) {
             uploadContainer.classList.remove('drag-over');
-        });
+        }
 
-        uploadContainer.addEventListener('drop', (event) => {
-            event.preventDefault();
-            uploadContainer.classList.remove('drag-over');
-            let files = event.dataTransfer.files;
-            if (files.length) {
-                fileInput.files = files;
-                processFile(files[0]);
-            }
-        });
+        uploadContainer.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFileSelect, false);
 
-        fileInput.addEventListener('change', () => {
-            let file = fileInput.files[0];
-            if (file) {
-                processFile(file);
-            }
-        });
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const file = dt.files[0];
+            handleFile(file);
+        }
 
-        function processFile(file) {
-            let reader = new FileReader();
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            handleFile(file);
+        }
 
-            reader.onloadstart = () => {
-                progressBar.style.display = 'block';
-                formatError.style.display = 'none';
-                resultsContainer.style.display = 'none';
-            };
+        function handleFile(file) {
+            if (!file) return;
 
-            reader.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    let percentage = (event.loaded / event.total) * 100;
-                    progress.style.width = percentage + '%';
-                }
-            };
+            fileInfo.textContent = `Selected file: ${file.name}`;
+            formatError.style.display = 'none';
+            progressBar.style.display = 'block';
+            progress.style.width = '0%';
+            resultsContainer.style.display = 'none';
 
-            reader.onloadend = () => {
-                progressBar.style.display = 'none';
-
-                let content = reader.result;
-                let lines = cleanText(content);
-
-                // Validate and process the content
-                let { processedLines, invalidLines } = validateAndProcessContent(lines);
-
-                if (invalidLines > 0) {
-                    formatError.style.display = 'block';
-                    formatError.innerHTML = `${invalidLines} invalid lines were skipped.`;
-                }
-
-                // Display results
-                if (processedLines.length > 0) {
-                    resultsContainer.style.display = 'block';
-                    resultsBody.innerHTML = '';
-                    let total = 0;
-
-                    for (let line of processedLines) {
-                        resultsBody.innerHTML += `
-                            <tr>
-                                <td>${line.courseID}</td>
-                                <td>${line.courseName}</td>
-                                <td>${line.credits}</td>
-                                <td>${line.grade}</td>
-                            </tr>
-                        `;
-                        total += line.credits;
-                    }
-
-                    totalCredits.innerText = total;
-                }
-            };
-
-            reader.onerror = () => {
+            if (file.type === 'application/pdf') {
+                processPDF(file);
+            } else if (file.type === 'text/plain') {
+                processTextFile(file);
+            } else {
+                formatError.textContent = 'Please upload a PDF or TXT file.';
                 formatError.style.display = 'block';
-                formatError.innerHTML = 'An error occurred while reading the file.';
+                progressBar.style.display = 'none';
+            }
+        }
+
+        async function processPDF(file) {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let extractedText = '';
+
+                progress.style.width = '30%';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    extractedText += pageText + '\n';
+                    
+                    progress.style.width = `${30 + (70 * i / pdf.numPages)}%`;
+                }
+
+                const lines = extractedText.split('\n');
+                validateAndProcessContent(lines);
+
+            } catch (error) {
+                console.error('PDF processing error:', error);
+                formatError.textContent = 'Error processing PDF: ' + error.message;
+                formatError.style.display = 'block';
+                progressBar.style.display = 'none';
+            }
+        }
+
+        function processTextFile(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                progress.style.width = '50%';
+                const content = e.target.result;
+                const lines = content.split('\n');
+                validateAndProcessContent(lines);
+            };
+
+            reader.onerror = function(error) {
+                console.error('File reading error:', error);
+                formatError.textContent = 'Error reading file';
+                formatError.style.display = 'block';
+                progressBar.style.display = 'none';
             };
 
             reader.readAsText(file);
         }
-    </script>
-</body>
-</html>
+
+        function validateAndProcessContent(lines) {
+            console.log('Processing lines:', lines);
+            const processedLines = [];
+            let invalidLines = 0;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (line === '') continue;
+
+                console.log('Processing line:', line);
+                
+                // Split by comma and trim each part
+                const parts = line.split(',').map(part => part.trim());
+                console.log('Split parts:', parts);
+
+                // Basic validation
+                if (parts.length !== 4) {
+                    console.log('Invalid parts length:', parts.length);
+                    invalidLines++;
+                    continue;
+                }
+
+                // Validate credits
+                const credits = parseFloat(parts[2]);
+                if (isNaN(credits)) {
+                    console.log('Invalid credits:', parts[2]);
+                    invalidLines++;
+                    continue;
+                }
+
+                // Validate grade format
+                const grade = parts[3].toUpperCase();
+                if (!grade.match(/^[A-F][+-]?$/)) {
+                    console.log('Invalid grade:', grade);
+                    invalidLines++;
+                    continue;
+                }
+
+                processedLines.push({
+                    courseID: parts[0],
+                    courseName: parts[1],
+                    credits: credits,
+                    grade: grade
+                });
+            }
+
+            progress.style.width = '100%';
+            setTimeout(() => {
+                progressBar.style.display = 'none';
+                progress.style.width = '0%';
+            }, 1000);
+
+            if (processedLines.length === 0) {
+                console.log('No valid lines found. Invalid lines:', invalidLines);
+                let errorMessage = 'No valid course entries found. ';
+                if (invalidLines > 0) {
+                    errorMessage += `Found ${invalidLines} invalid entries. `;
+                }
+                errorMessage += 'Please ensure each line follows the format: COURSE ID, COURSE NAME, CREDITS, GRADE RECEIVED';
+                
+                formatError.textContent = errorMessage;
+                formatError.style.display = 'block';
+                resultsContainer.style.display = 'none';
+            } else {
+                console.log('Valid lines found:', processedLines.length);
+                formatError.style.display = 'none';
+                displayResults(processedLines);
+            }
+        }
+
+        function displayResults(processedLines) {
+            const resultsBody = document.getElementById('results-body');
+            const totalCreditsCell = document.getElementById('total-credits');
+            
+            // Clear previous results
+            resultsBody.innerHTML = '';
+            
+            // Calculate total credits
+            const totalCredits = processedLines.reduce((sum, course) => sum + course.credits, 0);
+            
+            // Add each course to the table
+            processedLines.forEach(course => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${course.courseID}</td>
+                    <td>${course.courseName}</td>
+                    <td>${course.credits}</td>
+                    <td>${course.grade}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+            
+            // Update total credits
+            totalCreditsCell.textContent = totalCredits.toFixed(1);
+            
+            // Show the results
+
+
