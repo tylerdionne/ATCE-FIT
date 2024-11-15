@@ -258,220 +258,49 @@
     </footer>
 
     <script>
-        // Set up PDF.js worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-        // Initialize elements
-        const uploadContainer = document.getElementById('uploadContainer');
-        const fileInput = document.getElementById('transcript');
-        const fileInfo = document.getElementById('fileInfo');
-        const progressBar = document.getElementById('progressBar');
-        const progress = document.getElementById('progress');
-        const formatError = document.getElementById('format-error');
-        const resultsContainer = document.getElementById('results-container');
-
-        // Drag and drop event listeners
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadContainer.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        // Helper functions
+        function cleanText(text) {
+            return text.replace(/\r\n/g, '\n')
+                       .replace(/\r/g, '\n')
+                       .split('\n')
+                       .map(line => line.trim())
+                       .filter(line => line.length > 0);
         }
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadContainer.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadContainer.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(e) {
-            uploadContainer.classList.add('drag-over');
-        }
-
-        function unhighlight(e) {
-            uploadContainer.classList.remove('drag-over');
-        }
-
-        uploadContainer.addEventListener('drop', handleDrop, false);
-        fileInput.addEventListener('change', handleFileSelect, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const file = dt.files[0];
-            handleFile(file);
-        }
-
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            handleFile(file);
-        }
-
-        function handleFile(file) {
-            if (!file) return;
-
-            fileInfo.textContent = `Selected file: ${file.name}`;
-            formatError.style.display = 'none';
-            progressBar.style.display = 'block';
-            progress.style.width = '0%';
-            resultsContainer.style.display = 'none';
-
-            if (file.type === 'application/pdf') {
-                processPDF(file);
-            } else if (file.type === 'text/plain') {
-                processTextFile(file);
-            } else {
-                formatError.textContent = 'Please upload a PDF or TXT file.';
-                formatError.style.display = 'block';
-                progressBar.style.display = 'none';
-            }
-        }
-
-        async function processPDF(file) {
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                let extractedText = '';
-
-                progress.style.width = '30%';
-
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    const page = await pdf.getPage(i);
-                    const textContent = await page.getTextContent();
-                    const pageText = textContent.items.map(item => item.str).join(' ');
-                    extractedText += pageText + '\n';
-                    
-                    progress.style.width = `${30 + (70 * i / pdf.numPages)}%`;
-                }
-
-                const lines = extractedText.split('\n');
-                validateAndProcessContent(lines);
-
-            } catch (error) {
-                console.error('PDF processing error:', error);
-                formatError.textContent = 'Error processing PDF: ' + error.message;
-                formatError.style.display = 'block';
-                progressBar.style.display = 'none';
-            }
-        }
-
-        function processTextFile(file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                progress.style.width = '50%';
-                const content = e.target.result;
-                const lines = content.split('\n');
-                validateAndProcessContent(lines);
-            };
-
-            reader.onerror = function(error) {
-                console.error('File reading error:', error);
-                formatError.textContent = 'Error reading file';
-                formatError.style.display = 'block';
-                progressBar.style.display = 'none';
-            };
-
-            reader.readAsText(file);
+        function parseGrade(grade) {
+            grade = grade.trim().toUpperCase();
+            if (grade.match(/^[A-F][\+-]?$/)) return grade;
+            if (grade === 'A') return 'A';
+            if (grade === 'B') return 'B';
+            if (grade === 'C') return 'C';
+            if (grade === 'D') return 'D';
+            if (grade === 'F') return 'F';
+            return null;
         }
 
         function validateAndProcessContent(lines) {
-            console.log('Processing lines:', lines);
             const processedLines = [];
             let invalidLines = 0;
 
             for (let line of lines) {
-                line = line.trim();
-                if (line === '') continue;
+                try {
+                    if (!line || line.toLowerCase().includes('course') && line.toLowerCase().includes('grade')) {
+                        continue;
+                    }
 
-                console.log('Processing line:', line);
-                
-                // Split by comma and trim each part
-                const parts = line.split(',').map(part => part.trim());
-                console.log('Split parts:', parts);
+                    let parts;
+                    if (line.includes(',')) {
+                        parts = line.split(',').map(part => part.trim());
+                    } else if (line.includes('\t')) {
+                        parts = line.split('\t').map(part => part.trim());
+                    } else {
+                        parts = line.split(/\s{2,}/).map(part => part.trim());
+                    }
 
-                // Basic validation
-                if (parts.length !== 4) {
-                    console.log('Invalid parts length:', parts.length);
-                    invalidLines++;
-                    continue;
-                }
+                    if (parts.length < 3) {
+                        invalidLines++;
+                        continue;
+                    }
 
-                // Validate credits
-                const credits = parseFloat(parts[2]);
-                if (isNaN(credits)) {
-                    console.log('Invalid credits:', parts[2]);
-                    invalidLines++;
-                    continue;
-                }
-
-                // Validate grade format
-                const grade = parts[3].toUpperCase();
-                if (!grade.match(/^[A-F][+-]?$/)) {
-                    console.log('Invalid grade:', grade);
-                    invalidLines++;
-                    continue;
-                }
-
-                processedLines.push({
-                    courseID: parts[0],
-                    courseName: parts[1],
-                    credits: credits,
-                    grade: grade
-                });
-            }
-
-            progress.style.width = '100%';
-            setTimeout(() => {
-                progressBar.style.display = 'none';
-                progress.style.width = '0%';
-            }, 1000);
-
-            if (processedLines.length === 0) {
-                console.log('No valid lines found. Invalid lines:', invalidLines);
-                let errorMessage = 'No valid course entries found. ';
-                if (invalidLines > 0) {
-                    errorMessage += `Found ${invalidLines} invalid entries. `;
-                }
-                errorMessage += 'Please ensure each line follows the format: COURSE ID, COURSE NAME, CREDITS, GRADE RECEIVED';
-                
-                formatError.textContent = errorMessage;
-                formatError.style.display = 'block';
-                resultsContainer.style.display = 'none';
-            } else {
-                console.log('Valid lines found:', processedLines.length);
-                formatError.style.display = 'none';
-                displayResults(processedLines);
-            }
-        }
-
-        function displayResults(processedLines) {
-            const resultsBody = document.getElementById('results-body');
-            const totalCreditsCell = document.getElementById('total-credits');
-            
-            // Clear previous results
-            resultsBody.innerHTML = '';
-            
-            // Calculate total credits
-            const totalCredits = processedLines.reduce((sum, course) => sum + course.credits, 0);
-            
-            // Add each course to the table
-            processedLines.forEach(course => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${course.courseID}</td>
-                    <td>${course.courseName}</td>
-                    <td>${course.credits}</td>
-                    <td>${course.grade}</td>
-                `;
-                resultsBody.appendChild(row);
-            });
-            
-            // Update total credits
-            totalCreditsCell.textContent = totalCredits.toFixed(1);
-            
-            // Show the results
+                    let courseID = parts[0];
+                    let
