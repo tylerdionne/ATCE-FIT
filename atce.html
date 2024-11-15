@@ -47,7 +47,7 @@
             text-align: center;
             max-width: 800px;
             margin: 0 auto;
-            margin-bottom: 60px; /* Space for footer */
+            margin-bottom: 60px;
         }
 
         h1 {
@@ -55,7 +55,6 @@
             margin-bottom: 20px;
         }
 
-        /* Upload Container Styles */
         .upload-container {
             background-color: rgba(255, 255, 255, 0.1);
             border: 2px dashed rgba(255, 215, 0, 0.5);
@@ -137,7 +136,6 @@
             text-align: left;
         }
 
-        /* Results Styles */
         .results-container {
             display: none;
             margin-top: 30px;
@@ -270,6 +268,7 @@
         const progressBar = document.getElementById('progressBar');
         const progress = document.getElementById('progress');
         const formatError = document.getElementById('format-error');
+        const resultsContainer = document.getElementById('results-container');
 
         // Drag and drop event listeners
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -319,6 +318,7 @@
             formatError.style.display = 'none';
             progressBar.style.display = 'block';
             progress.style.width = '0%';
+            resultsContainer.style.display = 'none';
 
             if (file.type === 'application/pdf') {
                 processPDF(file);
@@ -352,6 +352,7 @@
                 validateAndProcessContent(lines);
 
             } catch (error) {
+                console.error('PDF processing error:', error);
                 formatError.textContent = 'Error processing PDF: ' + error.message;
                 formatError.style.display = 'block';
                 progressBar.style.display = 'none';
@@ -368,7 +369,8 @@
                 validateAndProcessContent(lines);
             };
 
-            reader.onerror = function() {
+            reader.onerror = function(error) {
+                console.error('File reading error:', error);
                 formatError.textContent = 'Error reading file';
                 formatError.style.display = 'block';
                 progressBar.style.display = 'none';
@@ -378,34 +380,48 @@
         }
 
         function validateAndProcessContent(lines) {
-            let isValid = true;
+            console.log('Processing lines:', lines);
             const processedLines = [];
+            let invalidLines = 0;
 
             for (let line of lines) {
                 line = line.trim();
                 if (line === '') continue;
 
+                console.log('Processing line:', line);
+                
+                // Split by comma and trim each part
                 const parts = line.split(',').map(part => part.trim());
+                console.log('Split parts:', parts);
+
+                // Basic validation
                 if (parts.length !== 4) {
-                    isValid = false;
-                    break;
+                    console.log('Invalid parts length:', parts.length);
+                    invalidLines++;
+                    continue;
                 }
 
-                if (isNaN(parts[2])) {
-                    isValid = false;
-                    break;
+                // Validate credits
+                const credits = parseFloat(parts[2]);
+                if (isNaN(credits)) {
+                    console.log('Invalid credits:', parts[2]);
+                    invalidLines++;
+                    continue;
                 }
 
-                if (!parts[3].match(/^[A-F][+-]?$/)) {
-                    isValid = false;
-                    break;
+                // Validate grade format
+                const grade = parts[3].toUpperCase();
+                if (!grade.match(/^[A-F][+-]?$/)) {
+                    console.log('Invalid grade:', grade);
+                    invalidLines++;
+                    continue;
                 }
 
                 processedLines.push({
                     courseID: parts[0],
                     courseName: parts[1],
-                    credits: parseFloat(parts[2]),
-                    grade: parts[3]
+                    credits: credits,
+                    grade: grade
                 });
             }
 
@@ -415,18 +431,25 @@
                 progress.style.width = '0%';
             }, 1000);
 
-            if (!isValid) {
-                formatError.textContent = 'Invalid format. Please ensure each line follows: COURSE ID, COURSE NAME, CREDITS, GRADE RECEIVED';
+            if (processedLines.length === 0) {
+                console.log('No valid lines found. Invalid lines:', invalidLines);
+                let errorMessage = 'No valid course entries found. ';
+                if (invalidLines > 0) {
+                    errorMessage += `Found ${invalidLines} invalid entries. `;
+                }
+                errorMessage += 'Please ensure each line follows the format: COURSE ID, COURSE NAME, CREDITS, GRADE RECEIVED';
+                
+                formatError.textContent = errorMessage;
                 formatError.style.display = 'block';
-                document.getElementById('results-container').style.display = 'none';
+                resultsContainer.style.display = 'none';
             } else {
+                console.log('Valid lines found:', processedLines.length);
                 formatError.style.display = 'none';
                 displayResults(processedLines);
             }
         }
 
         function displayResults(processedLines) {
-            const resultsContainer = document.getElementById('results-container');
             const resultsBody = document.getElementById('results-body');
             const totalCreditsCell = document.getElementById('total-credits');
             
@@ -451,9 +474,4 @@
             // Update total credits
             totalCreditsCell.textContent = totalCredits.toFixed(1);
             
-            // Show the results container
-            resultsContainer.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
+            // Show the results
